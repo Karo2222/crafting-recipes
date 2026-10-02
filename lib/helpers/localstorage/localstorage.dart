@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:craftingrecipes/main.dart';
 import 'connection/connection.dart' as impl;
 
@@ -90,12 +91,33 @@ class ChatConversationWithAccount {
 
 @DriftDatabase(tables: [], include: {'sql.drift'})
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(impl.connect());
-  AppDatabase.forTesting(super.executor);
+  AppDatabase()
+      : _resetSyncCursorsOnCreate = true,
+        super(impl.connect());
+  AppDatabase.forTesting(super.executor) : _resetSyncCursorsOnCreate = false;
+
+  final bool _resetSyncCursorsOnCreate;
+
+  /// A freshly created database is empty, so download cursors stored by an
+  /// earlier installation must not be reused; otherwise the next sync would
+  /// only ask for changes since then and the app would stay empty.
+  static Future<void> _forgetSyncCursors() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cursors = prefs.getKeys().where(
+          (key) => key.startsWith('sync_') && key != 'sync_status',
+        );
+    final beginning = DateTime(1900, 3, 1).toIso8601String();
+    for (final key in cursors.toList()) {
+      await prefs.setString(key, beginning);
+    }
+  }
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) => m.createAll(),
+        onCreate: (Migrator m) async {
+          await m.createAll();
+          if (_resetSyncCursorsOnCreate) await _forgetSyncCursors();
+        },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await m.addColumn(recipes, recipes.totalTimeMinutes);
