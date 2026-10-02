@@ -373,7 +373,6 @@ revoke all on table
   public.account_follow,
   public.category,
   public.comment,
-  public.device,
   public.history,
   public.host_codes,
   public.ingredient,
@@ -414,7 +413,6 @@ grant select on table
   public.account_follow,
   public.category,
   public.comment,
-  public.device,
   public.history,
   public.ingredient,
   public.meal_plan,
@@ -440,7 +438,6 @@ grant insert, update, delete on table
   public.account_follow,
   public.category,
   public.comment,
-  public.device,
   public.history,
   public.ingredient,
   public.meal_plan,
@@ -468,7 +465,6 @@ alter table public.account enable row level security;
 alter table public.account_follow enable row level security;
 alter table public.category enable row level security;
 alter table public.comment enable row level security;
-alter table public.device enable row level security;
 alter table public.history enable row level security;
 alter table public.host_codes enable row level security;
 alter table public.ingredient enable row level security;
@@ -857,16 +853,6 @@ with check (
   public.can_edit_meal_plan(meal_plan_id)
   and updated_by = public.current_account_id()
 );
-
--- Device registration is retained for compatibility. It is available only
--- after authentication; the table currently has no account_id ownership
--- column, so it is not used as an authorization boundary.
-drop policy if exists device_authenticated_read on public.device;
-create policy device_authenticated_read
-on public.device for select to authenticated using (true);
-drop policy if exists device_authenticated_insert on public.device;
-create policy device_authenticated_insert
-on public.device for insert to authenticated with check (true);
 
 -- host_codes intentionally has no table policy. Only validate_host_code() can
 -- inspect it from an app client.

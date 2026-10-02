@@ -14,7 +14,6 @@ import 'package:craftingrecipes/helpers/localstorage/localstorage.dart';
 import 'package:craftingrecipes/main.dart';
 import 'package:craftingrecipes/objects/singleton.dart';
 import 'package:path/path.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as s;
 
 class SupabaseToDrift {
   static Future<void>? _activeSync;
@@ -182,15 +181,6 @@ class SupabaseToDrift {
     final image = url?.toString().trim() ?? '';
     if (foundation.kIsWeb || image.isEmpty || index >= limit) return;
     await _downloadImages(id: ownerId, url: image, folderName: folder);
-  }
-
-  static Future<bool> isDeviceRegistrated(String deviceId) async {
-    final result = await supabase
-        .from('device')
-        .select('device_id')
-        .eq('device_id', deviceId)
-        .count(s.CountOption.exact);
-    return result.count == 1;
   }
 
   static Future<bool> hostCodeIsValid(String hostCode) async {

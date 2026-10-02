@@ -2239,13 +2239,6 @@ class DriftToSupabase {
         _nullableTrimmed(message.shoppingListNameSnapshot);
   }
 
-  /// Records this device once so it can receive account-specific features.
-  static Future<void> registerDevice(String deviceId) async {
-    if (await SupabaseToDrift.isDeviceRegistrated(deviceId)) return;
-    await supabase.from('device').insert({'device_id': deviceId});
-  }
-
-
   static Future<void> _checkCanCreateRecipe(int accountId) async {
     await _checkCurrentProfileCanModify(accountId);
     final roleName = await RecipePermissions.currentAccountRoleName();

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:craftingrecipes/helpers/constants.dart';
-import 'package:craftingrecipes/helpers/device_info.dart';
 import 'package:craftingrecipes/helpers/localstorage/drift_to_supabase.dart';
 import 'package:craftingrecipes/helpers/localstorage/key_value.dart';
 import 'package:craftingrecipes/helpers/localstorage/realtime.dart';
@@ -65,14 +64,6 @@ class AccountAuth {
       );
     }
 
-    try {
-      final deviceId = await DeviceInfo.getDeviceId();
-      if (deviceId != null && deviceId.isNotEmpty) {
-        await DriftToSupabase.registerDevice(deviceId);
-      }
-    } catch (error) {
-      logger.w('Device registration will retry later: $error');
-    }
     DriftToSupabase.initializeOfflineSync();
     Realtime.start();
     unawaited(PushNotifications.startForAccount(linkedAccount.accountId));
