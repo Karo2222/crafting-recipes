@@ -1,0 +1,6 @@
+{
+  "supabaseURL": "https://your-project-ref.supabase.co",
+  "publishableKey": "your-supabase-publishable-key",
+  "numberOfRecipeImagesToDownload": 10,
+  "numberOfStepImagesToDownload": 60
+}

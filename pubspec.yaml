@@ -1,0 +1,61 @@
+name: craftingrecipes
+description: Cross-platform recipe app with meal plans, shopping lists and chat.
+publish_to: 'none'
+version: 3.0.0
+
+environment:
+  sdk: '>=3.0.5 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Backend and notifications
+  supabase_flutter: ^2.15.4
+  firebase_core: 4.12.1
+  firebase_messaging: 16.4.3
+  flutter_local_notifications: ^19.5.0
+
+  # Local database and storage
+  drift: ^2.10.0
+  drift_dev: ^2.10.0
+  drift_db_viewer: ^2.0.0
+  sqlite3_flutter_libs: ^0.5.15
+  shared_preferences: ^2.2.0
+  path: ^1.8.3
+  path_provider: ^2.0.15
+  crypto: ^3.0.3
+  xid: ^1.0.12
+
+  # Device and platform
+  device_info_plus: ^10.1.2
+  android_id: ^0.4.0
+  connectivity_plus: ^6.1.5
+  app_links: ^6.4.1
+  url_launcher: ^6.3.2
+  image_picker: ^1.0.1
+  mobile_scanner: ^7.0.1
+
+  # UI and utilities
+  provider: ^6.0.5
+  flutter_slidable: ^4.0.3
+  flutter_widget_from_html_core: ^0.16.0
+  cupertino_icons: ^1.0.2
+  intl: ^0.19.0
+  logger: ^2.0.2+1
+  http: ^1.1.0
+  yaml: ^3.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.6
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Read at runtime to show the app version on the settings page.
+    - pubspec.yaml

@@ -1,0 +1,571 @@
+
+create table
+  categories (
+    id bigint not null,
+    name character not null,
+    created_at dateTime not null,
+    created_by bigint not null,
+    updated_at dateTime not null,
+    updated_by bigint not null,
+    deleted_at dateTime null,
+    deleted_by bigint null,
+    constraint category_pkey primary key (id)
+  ) as Category;
+
+
+create table
+  recipes (
+    id bigint,
+    title character not null,
+    image character null,
+    description character null,
+    notes character null,
+    total_time_minutes bigint null,
+    servings bigint null,
+    revision bigint not null default 1,
+    created_at dateTime not null,
+    created_by bigint not null,
+    updated_at dateTime not null,
+    updated_by bigint not null,
+    deleted_at dateTime null,
+    deleted_by bigint null,
+    constraint recipe_pkey primary key (id)
+  );
+
+  create table
+  shopping_categories (
+    code character not null,
+    name_en character not null,
+    name_de character not null,
+    sort_order bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint shopping_category_pkey primary key (code)
+  ) as ShoppingCategory;
+
+  create table
+  ingredients (
+    id bigint,
+    name character not null,
+    shopping_category_code character null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint ingredient_pkey primary key (id),
+    constraint ingredient_shopping_category_fkey foreign key (shopping_category_code) references shopping_categories (code) on update cascade
+  );
+
+  create table
+  measurement_units (
+    code character not null,
+    name_en character not null,
+    name_de character not null,
+    sort_order bigint not null,
+    selectable bool not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint measurement_unit_pkey primary key (code)
+  ) as MeasurementUnit;
+
+  create table
+  recipe_ingredients (
+    recipe_id bigint not null,
+    ingredient_id bigint not null,
+    amount real null,
+    unit character null,
+    quantity_note character null,
+    section_name character null,
+    sort_order bigint not null default 0,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint recipe_ingredient_pkey primary key (recipe_id, ingredient_id),
+    constraint recipe_ingredient_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade,
+    constraint recipe_ingredient_ingredient_id_fkey foreign key (ingredient_id) references ingredients (id) on delete cascade
+  ) as RecipeIngredient;
+
+  create table
+  comments (
+    id bigint not null,
+    recipe_id bigint not null,
+    account_id bigint not null,
+    message character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint comment_pkey primary key (id),
+    constraint comment_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade,
+    constraint comment_account_id_fkey foreign key (account_id) references accounts (id)
+  ) as Comment;
+
+  create table
+  histories (
+    account_id bigint not null,
+    recipe_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    step_nr bigint null,
+    open bool not null,
+    additional_data character null,
+    constraint history_pkey primary key (account_id, recipe_id),
+    constraint history_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade,
+    constraint history_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as History;
+
+  create table
+  roles (
+    id bigint,
+    name character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint role_pkey primary key (id)
+  );
+
+  create table
+  accounts (
+    id bigint,
+    account_name character not null,
+    profile_image character null,
+    bio character null,
+    role_id bigint not null,
+    host_code character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint account_pkey primary key (id),
+    constraint account_role_id_fkey foreign key (role_id) references roles (id) on delete cascade
+  ) as Account;
+
+  create table
+  profiles (
+    id bigint not null,
+    account_id bigint not null,
+    name character not null,
+    role_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint profile_pkey primary key (id),
+    constraint profile_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade,
+    constraint profile_role_id_fkey foreign key (role_id) references roles (id)
+  ) as Profile;
+
+  create table
+  account_follows (
+    follower_account_id bigint not null,
+    followed_account_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint account_follow_pkey primary key (follower_account_id, followed_account_id),
+    constraint account_follow_follower_fkey foreign key (follower_account_id) references accounts (id) on delete cascade,
+    constraint account_follow_followed_fkey foreign key (followed_account_id) references accounts (id) on delete cascade
+  ) as AccountFollow;
+
+  create table
+  account_friends (
+    first_account_id bigint not null,
+    second_account_id bigint not null,
+    requested_by bigint not null,
+    status character not null default 'pending',
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint account_friend_pkey primary key (first_account_id, second_account_id),
+    constraint account_friend_first_fkey foreign key (first_account_id) references accounts (id) on delete cascade,
+    constraint account_friend_second_fkey foreign key (second_account_id) references accounts (id) on delete cascade
+  ) as AccountFriend;
+
+  create table
+  chat_conversations (
+    first_account_id bigint not null,
+    second_account_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint chat_conversation_pkey primary key (first_account_id, second_account_id),
+    constraint chat_conversation_first_fkey foreign key (first_account_id) references accounts (id) on delete cascade,
+    constraint chat_conversation_second_fkey foreign key (second_account_id) references accounts (id) on delete cascade
+  ) as ChatConversation;
+
+  create table
+  chat_messages (
+    id bigint not null,
+    first_account_id bigint not null,
+    second_account_id bigint not null,
+    sender_account_id bigint not null,
+    message character null,
+    recipe_id bigint null,
+    recipe_title_snapshot character null,
+    shopping_list_id bigint null,
+    shopping_list_name_snapshot character null,
+    reply_to_message_id bigint null,
+    reply_message_snapshot character null,
+    read_at datetime null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint chat_message_pkey primary key (id),
+    constraint chat_message_conversation_fkey foreign key (first_account_id, second_account_id) references chat_conversations (first_account_id, second_account_id) on delete cascade,
+    constraint chat_message_sender_fkey foreign key (sender_account_id) references accounts (id) on delete cascade
+  ) as ChatMessage;
+
+  create table
+  chat_message_reactions (
+    message_id bigint not null,
+    account_id bigint not null,
+    reaction character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint chat_message_reaction_pkey primary key (message_id, account_id),
+    constraint chat_message_reaction_message_fkey foreign key (message_id) references chat_messages (id) on delete cascade,
+    constraint chat_message_reaction_account_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as ChatMessageReaction;
+
+  create table
+  recipe_likes (
+    account_id bigint not null,
+    recipe_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint recipe_like_pkey primary key (account_id, recipe_id),
+    constraint recipe_like_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade,
+    constraint recipe_like_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade
+  ) as RecipeLike;
+
+  create table
+  shopping_lists (
+    id bigint not null,
+    account_id bigint not null,
+    name character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint shopping_list_pkey primary key (id),
+    constraint shopping_list_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as ShoppingList;
+
+  create table
+  shopping_list_sections (
+    id bigint not null,
+    shopping_list_id bigint not null,
+    name character not null,
+    sort_order bigint not null default 0,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint shopping_list_section_pkey primary key (id),
+    constraint shopping_list_section_list_id_fkey foreign key (shopping_list_id) references shopping_lists (id) on delete cascade
+  ) as ShoppingListSection;
+
+  create table
+  shopping_list_items (
+    id bigint not null,
+    shopping_list_id bigint not null,
+    section_id bigint null,
+    ingredient_id bigint null,
+    name character not null,
+    amount real null,
+    unit character null,
+    note character null,
+    shopping_category_code character not null default 'other',
+    checked bool not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint shopping_list_item_pkey primary key (id),
+    constraint shopping_list_item_list_id_fkey foreign key (shopping_list_id) references shopping_lists (id) on delete cascade,
+    constraint shopping_list_item_section_id_fkey foreign key (section_id) references shopping_list_sections (id),
+    constraint shopping_list_item_ingredient_id_fkey foreign key (ingredient_id) references ingredients (id) on delete set null,
+    constraint shopping_list_item_category_fkey foreign key (shopping_category_code) references shopping_categories (code) on update cascade
+  ) as ShoppingListItem;
+
+  create table
+  shopping_list_members (
+  shopping_list_id bigint not null,
+  account_id bigint not null,
+  permission character not null,
+  status character not null default 'accepted',
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint shopping_list_member_pkey primary key (shopping_list_id, account_id),
+    constraint shopping_list_member_list_fkey foreign key (shopping_list_id) references shopping_lists (id) on delete cascade,
+    constraint shopping_list_member_account_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as ShoppingListMember;
+
+  create table
+  meal_plans (
+    id bigint not null,
+    account_id bigint not null,
+    name character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint meal_plan_pkey primary key (id),
+    constraint meal_plan_account_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as MealPlan;
+
+  create table
+  meal_plan_members (
+  meal_plan_id bigint not null,
+  account_id bigint not null,
+  permission character not null,
+  status character not null default 'accepted',
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint meal_plan_member_pkey primary key (meal_plan_id, account_id),
+    constraint meal_plan_member_plan_fkey foreign key (meal_plan_id) references meal_plans (id) on delete cascade,
+    constraint meal_plan_member_account_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as MealPlanMember;
+
+  create table
+  meal_plan_entries (
+    id bigint not null,
+    meal_plan_id bigint not null,
+    planned_date datetime not null,
+    meal_slot character not null,
+    recipe_id bigint null,
+    recipe_title_snapshot character null,
+    custom_title character null,
+    note character null,
+    servings bigint null,
+    sort_order bigint not null default 0,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint meal_plan_entry_pkey primary key (id),
+    constraint meal_plan_entry_plan_fkey foreign key (meal_plan_id) references meal_plans (id) on delete cascade,
+    constraint meal_plan_entry_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete set null
+  ) as MealPlanEntry;
+
+  create table
+  meal_plan_templates (
+    id bigint not null,
+    account_id bigint not null,
+    name character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint meal_plan_template_pkey primary key (id),
+    constraint meal_plan_template_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade
+  ) as MealPlanTemplate;
+
+  create table
+  meal_plan_template_entries (
+    id bigint not null,
+    template_id bigint not null,
+    day_offset bigint not null,
+    meal_slot character not null,
+    recipe_id bigint null,
+    recipe_title_snapshot character null,
+    custom_title character null,
+    note character null,
+    servings bigint null,
+    sort_order bigint not null default 0,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint meal_plan_template_entry_pkey primary key (id),
+    constraint meal_plan_template_entry_template_id_fkey foreign key (template_id) references meal_plan_templates (id) on delete cascade,
+    constraint meal_plan_template_entry_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete set null
+  ) as MealPlanTemplateEntry;
+
+  create table
+  pending_mutations (
+    id character not null,
+    account_id bigint null,
+    mutation_type character not null,
+    payload character not null,
+    created_at datetime not null,
+    attempts bigint not null default 0,
+    last_error character null,
+    blocked bool not null default false,
+    constraint pending_mutation_pkey primary key (id)
+  ) as PendingMutation;
+
+  create table
+  recipe_steps (
+    id bigint,
+    recipe_id bigint not null,
+    step_nr bigint not null,
+    description character not null,
+    image character null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint recipe_steps_pkey primary key (id),
+    constraint recipe_step_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade
+  );
+
+  create table
+  recipe_step_ingredients (
+    recipe_step_id bigint not null,
+    ingredient_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint recipe_step_ingredient_pkey primary key (recipe_step_id, ingredient_id),
+    constraint recipe_step_ingredient_recipe_step_id_fkey foreign key (recipe_step_id) references recipe_steps (id) on delete cascade,
+    constraint recipe_step_ingredient_ingredient_id_fkey foreign key (ingredient_id) references ingredients (id) on delete cascade
+  ) as RecipeStepIngredient;
+
+  create table
+  RecipesCategories (
+    category_id bigint not null,
+    recipe_id bigint not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    constraint recipe_category_pkey primary key (category_id, recipe_id),
+    constraint recipe_category_category_id_fkey foreign key (category_id) references categories (id) on delete cascade,
+    constraint recipe_category_recipe_id_fkey foreign key (recipe_id) references recipes (id) on delete cascade
+  ) as RecipeCategory;
+
+  create table
+  settings (
+    account_id bigint,
+    language character not null,
+    created_at datetime not null,
+    created_by bigint not null,
+    updated_at datetime not null,
+    updated_by bigint not null,
+    deleted_at datetime null,
+    deleted_by bigint null,
+    realtime bool not null,
+    lightmode bool not null,
+    constraint setting_pkey primary key (account_id),
+    constraint setting_account_id_fkey foreign key (account_id) references accounts (id) on delete cascade
+  );
+
+
+
+updateHistoryEntry(REQUIRED :recipe_id as int, REQUIRED :updated_at as datetime): WITH new_id AS (SELECT :recipe_id AS recipe_id, :updated_at as updated_at)
+INSERT INTO histories (account_id, recipe_id, created_by, created_at, updated_at, updated_by, step_nr, open)
+VALUES (:account_id,(SELECT recipe_id FROM new_id), :created_by, :created_at, :updated_at, :updated_by, (SELECT i.step_nr FROM recipe_steps i
+WHERE i.step_nr = (SELECT MIN(j.step_nr) FROM recipe_steps j WHERE j.recipe_id = (SELECT recipe_id FROM new_id)) AND i.recipe_id = (SELECT recipe_id FROM new_id)), false)
+ON CONFLICT (account_id, recipe_id) DO UPDATE
+SET updated_at = (SELECT updated_at FROM new_id), open = false;
+
+openRecipe(REQUIRED :account_id as int): SELECT * FROM recipes
+INNER JOIN histories ON recipes.id = histories.recipe_id
+WHERE histories.account_id = :account_id and histories.updated_at = (SELECT MAX (updated_at) FROM histories WHERE account_id = :account_id) AND recipes.deleted_at is NULL and histories.open = true;
+
+ingredientsOfRecipe(REQUIRED :recipe_id as int): SELECT ingredients.*, recipe_ingredients.amount, recipe_ingredients.unit, recipe_ingredients.quantity_note, recipe_ingredients.section_name, recipe_ingredients.sort_order FROM ingredients
+INNER JOIN recipe_ingredients ON ingredients.id = recipe_ingredients.ingredient_id
+WHERE recipe_ingredients.recipe_id = :recipe_id
+  AND ingredients.deleted_at is NULL
+  AND recipe_ingredients.deleted_at is NULL
+ORDER BY recipe_ingredients.sort_order, recipe_ingredients.created_at, recipe_ingredients.ingredient_id;
+
+ingredientsOfRecipeStep(REQUIRED :recipe_step_id as int): SELECT ingredients.*, recipe_ingredients.amount, recipe_ingredients.unit, recipe_ingredients.quantity_note, recipe_ingredients.section_name, recipe_ingredients.sort_order FROM recipe_step_ingredients
+INNER JOIN ingredients ON ingredients.id = recipe_step_ingredients.ingredient_id
+INNER JOIN recipe_steps ON recipe_steps.id = recipe_step_ingredients.recipe_step_id
+INNER JOIN recipe_ingredients ON recipe_ingredients.recipe_id = recipe_steps.recipe_id AND recipe_ingredients.ingredient_id = ingredients.id
+WHERE recipe_step_ingredients.recipe_step_id = :recipe_step_id
+  AND recipe_step_ingredients.deleted_at is NULL
+  AND ingredients.deleted_at is NULL
+  AND recipe_ingredients.deleted_at is NULL
+ORDER BY recipe_ingredients.sort_order, recipe_ingredients.created_at, recipe_ingredients.ingredient_id;
+
+historyEntriesOfAccountAsRecipes(REQUIRED :account_id as int): SELECT recipes.*, coalesce(q.number_of_steps, 0) as number_of_steps FROM recipes
+LEFT JOIN (SELECT recipe_id, COUNT(*) as number_of_steps FROM recipe_steps WHERE deleted_at is NULL GROUP BY recipe_id) q
+ON q.recipe_id = recipes.id
+INNER JOIN (SELECT * FROM histories WHERE account_id = :account_id and deleted_at is NULL) r
+ON r.recipe_id = recipes.id
+WHERE recipes.deleted_at is NULL
+ORDER BY r.updated_at DESC;
+
+allRecipes: SELECT recipes.*, coalesce(q.number_of_steps, 0) as number_of_steps FROM recipes
+LEFT JOIN (SELECT recipe_id, COUNT(*) as number_of_steps FROM recipe_steps WHERE deleted_at is NULL GROUP BY recipe_id) q
+ON q.recipe_id = recipes.id
+WHERE recipes.deleted_at is NULL
+ORDER BY id;
