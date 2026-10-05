@@ -69,3 +69,6 @@ macos/Podfile.lock
 TODO.txt
 .vscode/
 /android/build/
+
+# Supabase CLI temporary files
+supabase/.temp/
